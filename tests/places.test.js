@@ -55,6 +55,13 @@ describe('featuresToPlaces', () => {
     expect(places[0].description).toBe('1 St');
     expect(skipped).toEqual({ noGeometry: 1, duplicate: 1 });
   });
+  it('keeps same-named places at different locations', () => {
+    const twins = [
+      { type: 'Feature', geometry: { type: 'Point', coordinates: [-122, 37] }, properties: { NAME: 'Oak' } },
+      { type: 'Feature', geometry: { type: 'Point', coordinates: [-122.001, 37] }, properties: { NAME: 'Oak' } },
+    ];
+    expect(featuresToPlaces(twins, { nameField: 'NAME' }).places).toHaveLength(2);
+  });
   it('uses a template when given', () => {
     const { places } = featuresToPlaces(features.slice(0, 1), { nameField: 'NAME', descriptionTemplate: '{addr} ({name})' });
     expect(places[0].description).toBe('1 St (A)');

@@ -9,11 +9,16 @@ A **PocketMod** is one sheet of paper, printed on one side and folded into an ei
 ## Using it
 
 1. Paste a data URL and click **Load data**:
+   - an ArcGIS Hub dataset page from any Hub site, such as its Explore view. Filters applied in Hub become the where clause.
    - an ArcGIS Feature Service layer, e.g. `https://services.arcgis.com/…/FeatureServer/0`, with an optional **where** clause. Query parameters already on the URL (`where`, `geometry`, `token`, …) are forwarded, so a filtered `/query?…` link works as-is.
    - any GeoJSON URL, or a local `.geojson` file.
 2. Pick the title, the name field, and a description field or a `{FIELD}` template.
 3. Choose simple or overview pages, sheet count (auto by default), paper size and basemap, then **Generate booklet**.
 4. **Print / Save PDF** at 100% scale, portrait, single sided. Fold instructions are in the app.
+
+### Hub bookmarklet
+
+Open the app, expand **Use from ArcGIS Hub**, and drag the **PocketMap** button to your bookmarks bar. On any Hub dataset page, filtered or not, click the bookmark and the app opens with that layer and its filters. The bookmarklet only sends the page address; the app resolves the dataset through the Hub API (item id or `org::slug`) and translates Hub's `filters` parameter, base64 JSON such as `{"DISTRICT":["PARKS"],"DBH":[30,200]}`, into SQL using the layer's field types.
 
 The **Pages** view shows the booklet in reading order for proofing. **Copy link** produces a URL that rebuilds the same booklet, for example:
 
@@ -41,7 +46,7 @@ No server is required; `dist/` deploys to any static host. A GitHub Pages workfl
 src/
   booklet.js          pages, sheet nesting, cell order, capacity   (pure, tested)
   places.js           feature -> place normalisation, field inference, text cleanup
-  sources/            featureService.js, geojson.js, index.js (facade)
+  sources/            featureService.js, geojson.js, hub.js (Hub URL + filter translation), index.js (facade)
   maps/
     provider.js       MapProvider contract + createMapProvider() factory
     maplibre.js       MapLibre GL implementation (hidden map, canvas capture)

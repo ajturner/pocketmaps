@@ -21,9 +21,10 @@
     <aside class="panel">
       <form id="source-form" class="card">
         <h2>1. Data</h2>
-        <label>Feature layer or GeoJSON URL
-          <input id="url" type="url" inputmode="url" spellcheck="false" placeholder="https://…/FeatureServer/0  or  https://…/places.geojson">
+        <label>Hub dataset, feature layer, or GeoJSON URL
+          <input id="url" type="url" inputmode="url" spellcheck="false" placeholder="Hub dataset page, …/FeatureServer/0, or …/places.geojson">
         </label>
+        <p id="url-hint" class="muted"></p>
         <label>or a local GeoJSON file
           <input id="file" type="file" accept=".json,.geojson,application/geo+json,application/json">
         </label>
@@ -73,6 +74,18 @@
 
       <div id="status" class="status"></div>
       <progress id="progress" hidden></progress>
+
+      <details class="card help">
+        <summary>Use from ArcGIS Hub</summary>
+        <p>Drag this button to your bookmarks bar:</p>
+        <p><a id="bookmarklet" class="bookmarklet" href="#">PocketMap</a></p>
+        <ol>
+          <li>Open a dataset on any Hub site, for example its Explore view.</li>
+          <li>Apply filters in Hub if you want a subset.</li>
+          <li>Click the <b>PocketMap</b> bookmark. This app opens with the same layer and filters.</li>
+        </ol>
+        <p class="muted">It also works on a feature layer or GeoJSON URL. Only the page address is sent, so filters must be in the URL, which Hub does automatically.</p>
+      </details>
 
       <details class="card help">
         <summary>How to fold</summary>
