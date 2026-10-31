@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en" data-paper="letter">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PocketMaps</title>
+  <meta name="description" content="Fold a pocket-sized map booklet from any ArcGIS Feature Service layer or GeoJSON file.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2315202b'/%3E%3Ccircle cx='16' cy='14' r='6' fill='%23d7263d'/%3E%3Ccircle cx='16' cy='14' r='2.2' fill='%23fff'/%3E%3Cpath d='M8 26h16' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+  <style id="page-style">@page { size: letter portrait; margin: 0; }</style>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>PocketMaps</h1>
+      <p>Fold a pocket-sized map booklet from any feature service or GeoJSON.</p>
+    </div>
+    <button id="print" type="button" class="primary">Print / Save PDF</button>
+  </header>
+
+  <div class="app">
+    <aside class="panel">
+      <form id="source-form" class="card">
+        <h2>1. Data</h2>
+        <label>Feature layer or GeoJSON URL
+          <input id="url" type="url" inputmode="url" spellcheck="false" placeholder="https://…/FeatureServer/0  or  https://…/places.geojson">
+        </label>
+        <label>or a local GeoJSON file
+          <input id="file" type="file" accept=".json,.geojson,application/geo+json,application/json">
+        </label>
+        <label id="where-row">Where clause
+          <input id="where" value="1=1" spellcheck="false">
+        </label>
+        <label>Max features
+          <input id="max" type="number" min="1" max="2000" value="200">
+        </label>
+        <button id="load" type="submit">Load data</button>
+        <p id="source-summary" class="muted"></p>
+      </form>
+
+      <form id="booklet-form" class="card" hidden>
+        <h2>2. Booklet</h2>
+        <label>Title <input id="title" data-auto="1"></label>
+        <label>Subtitle <input id="subtitle" placeholder="optional"></label>
+        <label>Name field <select id="name-field"></select></label>
+        <label>Description field <select id="desc-field"></select></label>
+        <label>Description template <input id="desc-template" placeholder="optional, e.g. {ADDRESS}, {CITY}" spellcheck="false"></label>
+        <div class="row">
+          <label class="check"><input id="overview" type="checkbox"> Overview page per place</label>
+        </div>
+        <div class="row two">
+          <label>Sheets
+            <select id="sheets">
+              <option value="auto" selected>Auto</option>
+              <option>1</option><option>2</option><option>3</option><option>4</option>
+              <option>5</option><option>6</option><option>7</option><option>8</option>
+            </select>
+          </label>
+          <label>Paper
+            <select id="paper"><option value="letter" selected>Letter</option><option value="a4">A4</option></select>
+          </label>
+        </div>
+        <div class="row two">
+          <label>Basemap <select id="style"></select></label>
+          <label>Map detail
+            <select id="detail"><option value="2">Normal (2x)</option><option value="3" selected>Print (3x)</option></select>
+          </label>
+        </div>
+        <div class="row two">
+          <button id="generate" type="submit" class="primary">Generate booklet</button>
+          <button id="copy-link" type="button">Copy link</button>
+        </div>
+      </form>
+
+      <div id="status" class="status"></div>
+      <progress id="progress" hidden></progress>
+
+      <details class="card help">
+        <summary>How to fold</summary>
+        <ol>
+          <li>Print one side, portrait, at 100% (no "fit to page").</li>
+          <li>Fold the sheet in half the long way, then unfold.</li>
+          <li>Fold in half the short way, then each half in half again, so you have eight panels.</li>
+          <li>Cut along the solid line in the middle (between the centre panels).</li>
+          <li>Fold the long way again, push the ends together so the slit opens, and flatten into a booklet with the title page on the front.</li>
+          <li>With several sheets, nest sheet 2 inside sheet 1's centre spread, and so on.</li>
+        </ol>
+      </details>
+    </aside>
+
+    <main class="preview">
+      <div class="toolbar">
+        <label class="check"><input type="radio" name="view" value="sheets" checked> Sheets</label>
+        <label class="check"><input type="radio" name="view" value="pages"> Pages</label>
+        <label class="check"><input id="folds" type="checkbox" checked> Fold lines</label>
+      </div>
+      <div id="sheets-view" class="sheets"></div>
+      <div id="proof" class="proof" hidden></div>
+    </main>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
