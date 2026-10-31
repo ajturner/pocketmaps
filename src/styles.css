@@ -42,6 +42,9 @@ button:disabled { opacity: 0.5; cursor: default; }
 .status.working { color: var(--muted); }
 progress { width: 100%; }
 .help summary { cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+.help p { margin: 0.5rem 0 0; font-size: 0.82rem; color: var(--muted); }
+.bookmarklet { display: inline-block; padding: 0.35rem 0.8rem; border-radius: 999px; background: var(--accent); color: #fff !important; font-weight: 700; font-size: 0.85rem; text-decoration: none; cursor: grab; }
+#url-hint:empty { display: none; }
 .help ol { margin: 0.5rem 0 0; padding-left: 1.2rem; font-size: 0.82rem; color: var(--muted); line-height: 1.45; }
 .preview { padding: 1rem; overflow: auto; }
 .toolbar { display: flex; gap: 1.25rem; margin-bottom: 0.75rem; font-size: 0.85rem; }

@@ -14,7 +14,7 @@ const ui = {
   overview: $('overview'), sheets: $('sheets'), paper: $('paper'), style: $('style'), detail: $('detail'), generate: $('generate'), copyLink: $('copy-link'),
   status: $('status'), progress: $('progress'), print: $('print'),
   sheetsView: $('sheets-view'), proofView: $('proof'), viewRadios: document.querySelectorAll('input[name="view"]'), folds: $('folds'), pageStyle: $('page-style'),
-  whereRow: $('where-row'),
+  whereRow: $('where-row'), bookmarklet: $('bookmarklet'), urlHint: $('url-hint'),
 };
 
 const state = window.__pocketmaps = { source: null, booklet: null, provider: null, providerKey: null, renderer: null, specs: new Map(), busy: false };
@@ -45,6 +45,7 @@ function applyPaper() {
 function updateSourceKindUI() {
   const kind = detectSourceType(ui.url.value.trim());
   ui.whereRow.hidden = kind !== 'feature-service';
+  ui.urlHint.textContent = kind === 'hub' ? 'Hub dataset page: its filters become the where clause.' : '';
 }
 
 // ---------- provider ----------
@@ -69,7 +70,9 @@ async function loadData() {
     const url = ui.url.value.trim();
     if (!file && !url) throw new Error('Enter a data URL or choose a GeoJSON file.');
     const source = await loadSource({
-      url: file ? null : url, file, where: ui.where.value.trim(), maxFeatures: Number(ui.max.value) || 200,
+      url: file ? null : url, file, maxFeatures: Number(ui.max.value) || 200,
+      // A Hub page carries its own filters, so the where box is only used for plain layer URLs.
+      where: detectSourceType(url) === 'hub' ? '' : ui.where.value.trim(),
       onStatus: (m) => status(m, 'working'),
     });
     state.source = source;
@@ -80,6 +83,14 @@ async function loadData() {
     if (!ui.subtitle.value && source.where && source.where !== '1=1') ui.subtitle.value = source.where;
     const geom = source.geometryType ? source.geometryType.replace(/^esriGeometry/, '') : 'unknown geometry';
     ui.summary.textContent = `${source.features.length} features · ${geom} · ${source.fields.length} fields`;
+    if (source.type === 'hub') {
+      // Swap the Hub page for the layer it resolved to, with its filters as an editable where clause.
+      ui.url.value = source.url;
+      ui.where.value = source.where || '1=1';
+      updateSourceKindUI();
+      ui.summary.textContent = `From Hub: ${ui.summary.textContent}`;
+      if (source.skippedFilters?.length) ui.summary.textContent += ` · ignored filters on unknown fields: ${source.skippedFilters.join(', ')}`;
+    }
     status(`Loaded "${source.name}". Choose fields, then generate.`, 'ok');
     ui.bookletForm.hidden = false;
   } catch (err) {
@@ -174,6 +185,16 @@ function applyParams() {
   if (params.get('style')) { if (![...ui.style.options].some((o) => o.value === params.get('style'))) ui.style.append(new Option('Custom style', params.get('style'))); ui.style.value = params.get('style'); }
   if (params.get('max')) ui.max.value = params.get('max');
 }
+
+// ---------- bookmarklet ----------
+function bookmarkletCode(appUrl) {
+  const src = `(function(){var h=location.href;`
+    + `if(!/\\/(datasets|maps)\\/|\\/(Feature|Map)Server\\/\\d+|\\.geojson/i.test(h)){alert('PocketMaps: open a Hub dataset page (or a feature layer / GeoJSON URL) first.');return;}`
+    + `window.open(${JSON.stringify(appUrl + '?url=')}+encodeURIComponent(h),'_blank');})();`;
+  return `javascript:${src}`;
+}
+ui.bookmarklet.href = bookmarkletCode(location.origin + location.pathname.replace(/index\.html$/, ''));
+ui.bookmarklet.addEventListener('click', (e) => { e.preventDefault(); status('Drag the PocketMap button to your bookmarks bar.', 'warn'); });
 
 // ---------- wire up ----------
 for (const [label, url] of Object.entries(MAPLIBRE_STYLES)) ui.style.append(new Option(label, url));

@@ -136,7 +136,8 @@ export function featuresToPlaces(features, opts) {
     const name = cleanText(props[nameField]) || `Place ${i + 1}`;
     const raw = descriptionTemplate ? fillTemplate(descriptionTemplate, props) : (descriptionField ? props[descriptionField] : '');
     const description = truncate(cleanText(raw), maxLength);
-    const key = `${name}\u0000${description}`;
+    // Same name, text and position (to ~1 m) is a true duplicate; same species at another spot is not.
+    const key = `${name}\u0000${description}\u0000${pt[0].toFixed(5)},${pt[1].toFixed(5)}`;
     if (seen.has(key)) { skipped.duplicate++; return; }
     seen.add(key);
     places.push({ id: f.id ?? props.OBJECTID ?? props.objectid ?? i, name, description, lon: pt[0], lat: pt[1], properties: props });

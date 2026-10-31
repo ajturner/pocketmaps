@@ -1,3 +1,5 @@
+import { filtersToWhere } from './hub.js';
+
 /**
  * ArcGIS Feature Service layer source.
  *
@@ -96,7 +98,15 @@ export async function loadFeatureService(url, opts = {}) {
   const token = opts.token || params.token;
   opts.onStatus?.('Reading layer info…');
   const info = await fetchLayerInfo(layerUrl, { token });
-  const features = await queryFeatures(layerUrl, { ...opts, params, token });
+  // Hub filters need field types to become SQL, so they are translated here.
+  let where = opts.where || params.where || '';
+  let skippedFilters = [];
+  if (!opts.where && opts.hubFilters && Object.keys(opts.hubFilters).length) {
+    const built = filtersToWhere(opts.hubFilters, info.fields || []);
+    skippedFilters = built.skipped;
+    where = [params.where && params.where !== '1=1' ? `(${params.where})` : '', built.where].filter(Boolean).join(' AND ');
+  }
+  const features = await queryFeatures(layerUrl, { ...opts, params, token, where: where || '1=1' });
   return {
     type: 'feature-service',
     url: layerUrl,
@@ -106,7 +116,8 @@ export async function loadFeatureService(url, opts = {}) {
     fields: (info.fields || []).map((f) => ({ name: f.name, alias: f.alias, type: f.type })),
     geometryType: info.geometryType || null,
     attribution: info.copyrightText || '',
-    where: opts.where || params.where || '',
+    where,
+    skippedFilters,
     features,
   };
 }
