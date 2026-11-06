@@ -220,6 +220,7 @@ for (const r of ui.viewRadios) r.addEventListener('change', () => {
   ui.proofView.hidden = !proof;
 });
 
+if (location.hash === '#hub') document.getElementById('hub').open = true;
 setBusy(false);
 if (params.get('url')) {
   loadData().then(() => { if (state.source && params.get('go') !== '0') generate(); });

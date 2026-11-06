@@ -6,6 +6,12 @@ A **PocketMod** is one sheet of paper, printed on one side and folded into an ei
 
 ![pocketmaps](http://image.slidesharecdn.com/refreshdc-the-how-of-geo-1232637125612989-1/95/refreshdc-the-how-of-geo-215-728.jpg?cb=1232637674)
 
+## The site
+
+- **Home** (`index.html`): what PocketMaps does, with eight live examples. Each example card opens the generator with real public data, covering feature layers, a filtered Hub page and a live GeoJSON feed.
+- **Generator** (`app.html`): load data, choose fields, preview, and print. Old links of the form `/?url=…` redirect here, so existing bookmarklets keep working.
+- **How to fold** (`fold.html`): step-by-step SVG diagrams plus a table of which pages land on which sheet, computed from the same imposition code the generator uses.
+
 ## Using it
 
 1. Paste a data URL and click **Load data**:
@@ -36,7 +42,10 @@ npm install
 npm run dev       # http://localhost:5173
 npm test          # vitest: imposition, pagination, place parsing, source URL handling
 npm run build     # static site in dist/
+npm run thumbnails  # with the dev server running: rebuild public/examples/*.jpg from the live examples
 ```
+
+Examples are defined in `src/examples.js`. After adding or changing one, run `npm run thumbnails`, or name specific ids, such as `npm run thumbnails -- seward-murals`. The script drives your installed Google Chrome through playwright-core; set `CHROME=/path/to/chromium` to use another build.
 
 No server is required; `dist/` deploys to any static host. A GitHub Pages workflow is in `.github/workflows/`.
 
@@ -53,7 +62,10 @@ src/
     arcgis.js         stub for an ArcGIS Maps SDK implementation
     renderer.js       marker compositing, caching, serial queue
   render.js           DOM for pages, imposed sheets, proof view
-  main.js             UI wiring and permalinks
+  main.js             generator UI wiring and permalinks
+  home.js, examples.js welcome page and curated examples
+  fold.js             fold-guide diagrams (inline SVG) and nesting table
+  site.css            shared styles for the welcome and fold pages
   styles.css          page layout, rotated cells, print rules
 legacy/ruby/          the 2008 Ruby/PDF::Writer original
 NOTES.md              review notes on the legacy code and what was preserved
