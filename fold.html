@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How to Fold</title>
+  <meta name="description" content="Step-by-step diagrams for folding a printed PocketMap sheet into an eight-page booklet.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2315202b'/%3E%3Ccircle cx='16' cy='14' r='6' fill='%23d7263d'/%3E%3Ccircle cx='16' cy='14' r='2.2' fill='%23fff'/%3E%3Cpath d='M8 26h16' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+</head>
+<body>
+  <header class="site-nav">
+    <a class="brand" href="./"><svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#15202b"/><circle cx="16" cy="14" r="6" fill="#d7263d"/><circle cx="16" cy="14" r="2.2" fill="#fff"/><path d="M8 26h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>PocketMaps</a>
+    <nav aria-label="Site">
+      <a href="./">Home</a>
+      <a href="app.html">Make a map</a>
+      <a href="fold.html" aria-current="page">How to fold</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section class="guide-hero">
+      <p class="eyebrow">Six folds and one cut</p>
+      <h1>How to fold a PocketMap</h1>
+      <p class="lede">Every sheet becomes an eight-page booklet. It takes about a minute, and you only need scissors.</p>
+      <div class="tips">
+        <div class="tip"><b>Print at 100%</b>Turn off &ldquo;fit to page&rdquo; so the panels line up with the folds.</div>
+        <div class="tip"><b>One side only</b>Each sheet is single sided. Plain letter or A4 paper works.</div>
+        <div class="tip"><b>Use the guides</b>The dashed lines on the print are the folds. The solid line in the middle is the cut.</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="legend" id="legend"></div>
+      <ol class="fold-steps" id="fold-steps"></ol>
+    </section>
+
+    <section class="nesting">
+      <div class="section-head">
+        <div><h2>Which pages go on which sheet</h2><p>Sheets nest like a stapled booklet. The outer sheet carries the first and last pages.</p></div>
+        <label class="tip" style="display:flex;gap:.5rem;align-items:center">Sheets in my booklet
+          <select id="sheet-count"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select>
+        </label>
+      </div>
+      <div id="nest-table" class="nest-table"></div>
+    </section>
+
+    <section>
+      <div class="callout">
+        <div><h2>Ready to make one?</h2><p>Start from an example or bring your own layer.</p></div>
+        <a class="btn ghost" href="app.html">Make a PocketMap</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span>PocketMaps: foldable map booklets from open data. Based on Aaron Straup Cope&rsquo;s mmPDF and the 2008 original.</span>
+      <span>Basemaps &copy; OpenFreeMap, OpenMapTiles, OpenStreetMap contributors · <a href="https://github.com/ajturner/pocketmaps">Source on GitHub</a></span>
+    </div>
+  </footer>
+  <script type="module" src="/src/fold.js"></script>
+</body>
+</html>

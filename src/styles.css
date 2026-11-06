@@ -20,6 +20,12 @@ body { margin: 0; background: var(--bg); color: var(--ink); }
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.75rem 1.25rem; background: #fff; border-bottom: 1px solid var(--line); }
 .topbar h1 { margin: 0; font-size: 1.15rem; }
 .topbar p { margin: 0.1rem 0 0; color: var(--muted); font-size: 0.85rem; }
+.topbar h1 a { color: inherit; text-decoration: none; }
+.topnav { display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap; }
+.topnav a { color: var(--muted); text-decoration: none; font-size: 0.88rem; padding: 0.4rem 0.6rem; border-radius: 6px; }
+.topnav a:hover { color: var(--ink); background: #f0f2f4; }
+.topnav button { margin-left: 0.5rem; }
+.help a { color: var(--ink); font-weight: 600; }
 .app { display: grid; grid-template-columns: 340px 1fr; min-height: calc(100vh - 60px); }
 @media (max-width: 900px) { .app { grid-template-columns: 1fr; } }
 .panel { padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; border-right: 1px solid var(--line); background: #f7f8fa; }
