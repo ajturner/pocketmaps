@@ -13,7 +13,8 @@
   "license": "MIT",
   "author": "Andrew Turner",
   "dependencies": {
-    "maplibre-gl": "^6.16.0"
+    "maplibre-gl": "^6.16.0",
+    "qrcode-generator": "^2.0.4"
   },
   "devDependencies": {
     "playwright-core": "^1.65.0",

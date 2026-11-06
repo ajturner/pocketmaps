@@ -53,6 +53,24 @@
         <div class="row">
           <label class="check"><input id="overview" type="checkbox"> Overview page per place</label>
         </div>
+        <fieldset class="qr-editor">
+          <label class="check"><input id="qr-enabled" type="checkbox" checked> QR code on each place page</label>
+          <div class="qr-options">
+            <label>Scanning opens
+              <select id="qr-preset"></select>
+            </label>
+            <div class="field-label" id="qr-template-label">Link template</div>
+            <div id="qr-template" aria-labelledby="qr-template-label"></div>
+            <div class="chip-palette" aria-label="Insert placeholder">
+              <span class="muted">Insert</span>
+              <button type="button" class="chip-add builtin" data-key="latitude">latitude</button>
+              <button type="button" class="chip-add builtin" data-key="longitude">longitude</button>
+              <button type="button" class="chip-add builtin" data-key="name">name</button>
+              <select id="qr-field" class="chip-add-field" aria-label="Insert a field"><option value="">field…</option></select>
+            </div>
+            <p id="qr-preview" class="muted qr-preview"></p>
+          </div>
+        </fieldset>
         <div class="row two">
           <label>Sheets
             <select id="sheets">

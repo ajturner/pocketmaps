@@ -6,6 +6,9 @@ import { renderSheets, renderProof, hydrateMaps } from './render.js';
 import { createMapProvider } from './maps/provider.js';
 import { MapImageRenderer } from './maps/renderer.js';
 import { MAPLIBRE_STYLES } from './maps/maplibre.js';
+import { LINK_PRESETS, DEFAULT_LINK_TEMPLATE, BUILTIN_PLACEHOLDERS, presetFor, fillLinkTemplate, unknownPlaceholders } from './links.js';
+import { geometryPoint, cleanText } from './places.js';
+import { createChipInput } from './chipInput.js';
 
 const $ = (id) => document.getElementById(id);
 const ui = {
@@ -15,6 +18,7 @@ const ui = {
   status: $('status'), progress: $('progress'), print: $('print'),
   sheetsView: $('sheets-view'), proofView: $('proof'), viewRadios: document.querySelectorAll('input[name="view"]'), folds: $('folds'), pageStyle: $('page-style'),
   whereRow: $('where-row'), bookmarklet: $('bookmarklet'), urlHint: $('url-hint'),
+  qrEnabled: $('qr-enabled'), qrPreset: $('qr-preset'), qrField: $('qr-field'), qrPreview: $('qr-preview'),
 };
 
 const state = window.__pocketmaps = { source: null, booklet: null, provider: null, providerKey: null, renderer: null, specs: new Map(), busy: false };
@@ -79,6 +83,8 @@ async function loadData() {
     const guess = inferFields(source.fields, { displayField: source.displayField });
     fillSelect(ui.nameField, source.fields, params.get('name') || guess.nameField, false);
     fillSelect(ui.descField, source.fields, params.has('desc') ? params.get('desc') : guess.descriptionField, true);
+    ui.qrField.replaceChildren(new Option('field…', ''), ...source.fields.map((f) => new Option(f.name, f.name)));
+    updateQrPreview();
     if (!ui.title.value || ui.title.dataset.auto === '1') { ui.title.value = prettyName(source.name); ui.title.dataset.auto = '1'; }
     if (!ui.subtitle.value && source.where && source.where !== '1=1') ui.subtitle.value = source.where;
     const geom = source.geometryType ? source.geometryType.replace(/^esriGeometry/, '') : 'unknown geometry';
@@ -114,6 +120,12 @@ async function generate() {
       descriptionTemplate: ui.template.value.trim() || null,
     });
     if (!places.length) throw new Error('No features with usable geometry.');
+    const linkTemplate = ui.qrEnabled.checked ? qrInput.value.trim() : '';
+    const linkLabel = linkCaption(linkTemplate);
+    for (const p of places) {
+      p.link = linkTemplate ? fillLinkTemplate(linkTemplate, p) : '';
+      p.linkLabel = linkLabel;
+    }
 
     const renderer = await getRenderer();
     status('Loading basemap…', 'working');
@@ -170,6 +182,8 @@ function permalink() {
   if (ui.paper.value !== 'letter') p.set('paper', ui.paper.value);
   if (ui.style.value !== MAPLIBRE_STYLES['OpenFreeMap Liberty']) p.set('style', ui.style.value);
   if (ui.max.value !== '200') p.set('max', ui.max.value);
+  if (!ui.qrEnabled.checked) p.set('qr', '0');
+  else if (qrInput.value.trim() !== DEFAULT_LINK_TEMPLATE) p.set('qrlink', qrInput.value.trim());
   const qs = p.toString();
   return location.pathname + (qs ? `?${qs}` : '');
 }
@@ -184,6 +198,8 @@ function applyParams() {
   if (params.get('paper')) ui.paper.value = params.get('paper');
   if (params.get('style')) { if (![...ui.style.options].some((o) => o.value === params.get('style'))) ui.style.append(new Option('Custom style', params.get('style'))); ui.style.value = params.get('style'); }
   if (params.get('max')) ui.max.value = params.get('max');
+  if (params.get('qr') === '0') ui.qrEnabled.checked = false;
+  if (params.get('qrlink')) qrInput.value = params.get('qrlink');
 }
 
 // ---------- bookmarklet ----------
@@ -197,8 +213,60 @@ ui.bookmarklet.href = bookmarkletCode(location.origin + location.pathname.replac
 ui.bookmarklet.addEventListener('click', (e) => { e.preventDefault(); status('Drag the PocketMap button to your bookmarks bar.', 'warn'); });
 
 // ---------- wire up ----------
+// ---------- QR link editor ----------
+const qrInput = createChipInput(document.getElementById('qr-template'), {
+  value: DEFAULT_LINK_TEMPLATE,
+  builtins: BUILTIN_PLACEHOLDERS,
+  onChange: () => { syncPreset(); updateQrPreview(); },
+});
+for (const preset of LINK_PRESETS) ui.qrPreset.append(new Option(preset.label, preset.id));
+ui.qrPreset.append(new Option('Custom link…', 'custom'));
+
+function syncPreset() {
+  ui.qrPreset.value = presetFor(qrInput.value.trim())?.id || 'custom';
+}
+function linkCaption(template) {
+  const preset = presetFor(template);
+  return preset ? `Scan for ${preset.label.replace(/ \(geo:\)$/, '')}` : 'Scan for link';
+}
+/** Fill the template with the first loaded place so the result is visible before generating. */
+function updateQrPreview() {
+  const template = qrInput.value.trim();
+  if (!template) { ui.qrPreview.textContent = 'Empty link: no QR codes will be printed.'; ui.qrPreview.className = 'muted qr-preview warn'; return; }
+  const unknown = unknownPlaceholders(template, state.source?.fields || []);
+  const feature = state.source?.features.find((f) => geometryPoint(f.geometry));
+  let text = '';
+  if (feature) {
+    const [lon, lat] = geometryPoint(feature.geometry);
+    const name = cleanText(feature.properties?.[ui.nameField.value]) || 'Place 1';
+    text = `First place: ${fillLinkTemplate(template, { lon, lat, name, properties: feature.properties })}`;
+  } else {
+    text = 'Placeholders are filled for each place when the booklet is generated.';
+  }
+  if (unknown.length && state.source) text += ` · Unknown: ${unknown.map((k) => `{${k}}`).join(', ')}`;
+  ui.qrPreview.textContent = text;
+  ui.qrPreview.className = `muted qr-preview${unknown.length && state.source ? ' warn' : ''}`;
+}
+ui.qrPreset.addEventListener('change', () => {
+  const preset = LINK_PRESETS.find((p) => p.id === ui.qrPreset.value);
+  if (preset) qrInput.value = preset.template;
+  else document.getElementById('qr-template').focus();
+  updateQrPreview();
+});
+for (const btn of document.querySelectorAll('.chip-add[data-key]')) {
+  btn.addEventListener('mousedown', (e) => e.preventDefault()); // keep the caret in the editor
+  btn.addEventListener('click', () => qrInput.insert(btn.dataset.key));
+}
+ui.qrField.addEventListener('change', () => {
+  if (ui.qrField.value) qrInput.insert(ui.qrField.value);
+  ui.qrField.value = '';
+});
+ui.nameField.addEventListener('change', updateQrPreview);
+
 for (const [label, url] of Object.entries(MAPLIBRE_STYLES)) ui.style.append(new Option(label, url));
 applyParams();
+syncPreset();
+updateQrPreview();
 applyPaper();
 updateSourceKindUI();
 
