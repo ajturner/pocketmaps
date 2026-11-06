@@ -14,6 +14,7 @@
  * @property {[[number,number],[number,number]]} [bounds] [[minLon,minLat],[maxLon,maxLat]] when kind === 'bounds'
  * @property {number} width            CSS px
  * @property {number} height           CSS px
+ * @property {{top:number,right:number,bottom:number,left:number}} [padding] CSS px kept free when fitting bounds
  * @property {Array<{lon:number,lat:number,label?:string}>} [markers]  passed so a provider may use them for padding/fit, never for drawing
  *
  * @typedef {object} RenderedBasemap

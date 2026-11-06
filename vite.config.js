@@ -14,6 +14,7 @@ export default defineConfig({
         home: resolve(import.meta.dirname, 'index.html'),
         app: resolve(import.meta.dirname, 'app.html'),
         fold: resolve(import.meta.dirname, 'fold.html'),
+        view: resolve(import.meta.dirname, 'view.html'),
       },
     },
   },

@@ -83,7 +83,7 @@ export class MapLibreProvider extends MapProvider {
     map.resize();
 
     if (spec.kind === 'bounds') {
-      map.fitBounds(spec.bounds, { padding: this.fitPadding, maxZoom: this.maxFitZoom, animate: false, duration: 0 });
+      map.fitBounds(spec.bounds, { padding: spec.padding ?? this.fitPadding, maxZoom: this.maxFitZoom, animate: false, duration: 0 });
     } else {
       map.jumpTo({ center: spec.center, zoom: this.zooms[spec.level] ?? this.zooms.street, bearing: 0, pitch: 0 });
     }

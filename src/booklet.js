@@ -123,6 +123,7 @@ export function buildBooklet(places, options = {}) {
     index: indexOpts = {},
     date = new Date(),
     attribution = '',
+    indexLink = '',
   } = options;
 
   let sheets = options.sheets === undefined || options.sheets === 'auto'
@@ -173,7 +174,8 @@ export function buildBooklet(places, options = {}) {
       type: 'index',
       first: i === 0,
       entries: entries.slice(cursor, cursor + take),
-      map: i === 0 && kept.length ? extentMapSpec(kept, { labels: true }) : null,
+      map: i === 0 && kept.length ? extentMapSpec(kept, { labels: true, reserveCorner: Boolean(indexLink) }) : null,
+      link: i === 0 ? indexLink : '',
       attribution: i === indexPages - 1 ? attribution : '',
     });
     cursor += take;
@@ -199,11 +201,13 @@ export function pointMapSpec(place, level) {
 }
 
 /** Map request covering every place, optionally labelled with page numbers. */
-export function extentMapSpec(places, { labels = true, width = 264, height = 135 } = {}) {
+export function extentMapSpec(places, { labels = true, width = 264, height = 135, reserveCorner = false } = {}) {
   return {
     kind: 'bounds',
     level: 'extent',
     bounds: placesBounds(places),
+    // Keep markers clear of the QR card printed over the top-right corner.
+    ...(reserveCorner ? { padding: { top: 18, bottom: 18, left: 18, right: 112 } } : {}),
     markers: places.map((p) => ({ lon: p.lon, lat: p.lat, label: labels ? String(p.page ?? p.ordinal) : undefined })),
     width,
     height,

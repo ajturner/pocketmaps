@@ -4,6 +4,7 @@
  * fills them in once the provider has rendered each spec.
  */
 import { sheetGrid, mapKey } from './booklet.js';
+import { qrSvg } from './links.js';
 
 const el = (tag, attrs = {}, ...children) => {
   const node = document.createElement(tag);
@@ -24,6 +25,23 @@ function mapImg(spec, specs, cls = '') {
   const key = mapKey(spec);
   specs.set(key, spec);
   return el('img', { class: `map ${cls}`.trim(), alt: '', 'data-map-key': key, width: spec.width, height: spec.height });
+}
+
+function qrBlock(place) {
+  const a = el('a', { class: 'qr', href: place.link, title: place.link });
+  a.innerHTML = qrSvg(place.link);
+  a.querySelector('svg')?.setAttribute('aria-hidden', 'true');
+  append(a, el('span', { text: place.linkLabel || 'Scan for map' }));
+  return a;
+}
+
+/** QR on the index: opens the online map of this booklet, where readers can print their own. */
+function indexQr(link) {
+  const a = el('a', { class: 'qr-card', href: link, title: link });
+  a.innerHTML = qrSvg(link, 'L');
+  a.querySelector('svg')?.setAttribute('aria-hidden', 'true');
+  append(a, el('span', { text: 'Live map & print your own' }));
+  return a;
 }
 
 const fmtDate = (d) => d.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -47,15 +65,17 @@ export function renderPage(page, ctx) {
         page.attribution ? el('div', { class: 'attribution', text: page.attribution }) : null,
       );
       break;
-    case 'place':
+    case 'place': {
+      const text = el('div', { class: 'text' },
+        el('h2', { text: page.place.name }),
+        page.place.description ? el('p', { text: page.place.description }) : null,
+      );
       append(node,
         mapImg(page.map, ctx.specs, 'street'),
-        el('div', { class: 'body' },
-          el('h2', { text: page.place.name }),
-          page.place.description ? el('p', { text: page.place.description }) : null,
-        ),
+        el('div', { class: page.place.link ? 'body has-qr' : 'body' }, text, page.place.link ? qrBlock(page.place) : null),
       );
       break;
+    }
     case 'overview':
       append(node,
         mapImg(page.maps.city, ctx.specs, 'city'),
@@ -69,7 +89,8 @@ export function renderPage(page, ctx) {
     case 'index':
       append(node,
         page.first ? el('h2', { text: 'Index' }) : null,
-        page.map ? mapImg(page.map, ctx.specs, 'extent') : null,
+        page.map && page.link ? el('div', { class: 'extent-wrap' }, mapImg(page.map, ctx.specs, 'extent'), indexQr(page.link))
+          : page.map ? mapImg(page.map, ctx.specs, 'extent') : page.link ? indexQr(page.link) : null,
         el('ol', { class: 'entries' }, page.entries.map((e) =>
           el('li', {},
             el('span', { class: 'name', text: e.name }),
