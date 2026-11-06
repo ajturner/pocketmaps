@@ -152,6 +152,12 @@ body.hide-folds .folds { display: none; }
 .page-index .entries .leader { flex: 1; min-width: 0.12in; border-bottom: 1px dotted #9aa5b1; transform: translateY(-0.03in); }
 .page-index .entries .pg { font-variant-numeric: tabular-nums; }
 
+.extent-wrap { position: relative; flex: none; }
+.qr-card { position: absolute; top: 0.05in; right: 0.05in; width: 1in; padding: 0.05in 0.05in 0.035in; background: #fff; border-radius: 0.05in; box-shadow: 0 0 0 0.5pt rgba(21, 32, 43, 0.25); display: flex; flex-direction: column; align-items: center; gap: 0.025in; color: var(--ink); text-decoration: none; }
+.page-index > .qr-card { position: static; margin: 0.04in 0.16in 0; flex-direction: row; width: auto; }
+.qr-card svg { width: 0.9in; height: 0.9in; display: block; }
+.qr-card span { font-size: 4.6pt; line-height: 1.15; text-align: center; font-weight: 600; }
+
 /* ---------- print ---------- */
 @media print {
   body { background: #fff; }

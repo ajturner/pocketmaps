@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PocketMap Live</title>
+  <meta name="description" content="The live, interactive map behind a printed PocketMap, with a link to print your own copy.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2315202b'/%3E%3Ccircle cx='16' cy='14' r='6' fill='%23d7263d'/%3E%3Ccircle cx='16' cy='14' r='2.2' fill='%23fff'/%3E%3Cpath d='M8 26h16' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+  <!-- ArcGIS Maps SDK for JavaScript (bundles Calcite). Loaded only on this page. -->
+  <script type="module" src="https://js.arcgis.com/5.2.0/"></script>
+</head>
+<body>
+  <calcite-shell id="shell">
+    <header slot="header" class="vw-header">
+      <a class="vw-brand" href="./" aria-label="PocketMaps home">
+        <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#15202b"/><circle cx="16" cy="14" r="6" fill="#d7263d"/><circle cx="16" cy="14" r="2.2" fill="#fff"/><path d="M8 26h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+      </a>
+      <div class="vw-titles">
+        <h1 id="vw-title">Loading PocketMap…</h1>
+        <p id="vw-subtitle" class="vw-sub"></p>
+      </div>
+      <div class="vw-actions">
+        <calcite-button id="vw-print" icon-start="print" kind="brand" disabled>Print your own copy</calcite-button>
+      </div>
+    </header>
+
+    <calcite-shell-panel slot="panel-start" id="vw-panel" width="m" resizable>
+      <calcite-panel id="vw-places" heading="Places">
+        <calcite-notice id="vw-error" kind="danger" icon="exclamation-mark-triangle" hidden>
+          <div slot="title">Could not load this map</div>
+          <div slot="message" id="vw-error-msg"></div>
+        </calcite-notice>
+        <div id="vw-skeleton" class="vw-skeleton" aria-busy="true" aria-label="Loading places">
+          <div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+        <calcite-list id="vw-list" label="Places in this booklet" filter-enabled filter-placeholder="Find a place" selection-mode="single-persist" selection-appearance="border" hidden></calcite-list>
+        <div slot="footer" class="vw-footer">
+          <p id="vw-asof"></p>
+          <p>Numbers match the pages of the printed booklet. <a href="./">Make your own PocketMap</a>.</p>
+        </div>
+      </calcite-panel>
+    </calcite-shell-panel>
+
+    <arcgis-map id="vw-map" basemap="topo-vector" center="-98, 39" zoom="3">
+      <arcgis-zoom slot="top-left"></arcgis-zoom>
+      <arcgis-home slot="top-left"></arcgis-home>
+      <arcgis-locate slot="top-left"></arcgis-locate>
+    </arcgis-map>
+  </calcite-shell>
+
+  <script type="module" src="/src/view.js"></script>
+</body>
+</html>

@@ -6,7 +6,7 @@ import { renderSheets, renderProof, hydrateMaps } from './render.js';
 import { createMapProvider } from './maps/provider.js';
 import { MapImageRenderer } from './maps/renderer.js';
 import { MAPLIBRE_STYLES } from './maps/maplibre.js';
-import { LINK_PRESETS, DEFAULT_LINK_TEMPLATE, BUILTIN_PLACEHOLDERS, presetFor, fillLinkTemplate, unknownPlaceholders } from './links.js';
+import { LINK_PRESETS, DEFAULT_LINK_TEMPLATE, BUILTIN_PLACEHOLDERS, presetFor, fillLinkTemplate, unknownPlaceholders, viewerUrl } from './links.js';
 import { geometryPoint, cleanText } from './places.js';
 import { createChipInput } from './chipInput.js';
 
@@ -18,7 +18,7 @@ const ui = {
   status: $('status'), progress: $('progress'), print: $('print'),
   sheetsView: $('sheets-view'), proofView: $('proof'), viewRadios: document.querySelectorAll('input[name="view"]'), folds: $('folds'), pageStyle: $('page-style'),
   whereRow: $('where-row'), bookmarklet: $('bookmarklet'), urlHint: $('url-hint'),
-  qrEnabled: $('qr-enabled'), qrPreset: $('qr-preset'), qrField: $('qr-field'), qrPreview: $('qr-preview'),
+  qrEnabled: $('qr-enabled'), indexQr: $('index-qr'), qrPreset: $('qr-preset'), qrField: $('qr-field'), qrPreview: $('qr-preview'),
 };
 
 const state = window.__pocketmaps = { source: null, booklet: null, provider: null, providerKey: null, renderer: null, specs: new Map(), busy: false };
@@ -136,6 +136,7 @@ async function generate() {
       overview: ui.overview.checked,
       sheets: ui.sheets.value,
       attribution: [state.source.attribution, state.provider.attribution].filter(Boolean).join(' · '),
+      indexLink: ui.indexQr.checked && state.source.url ? viewerUrl(bookletParams({ forViewer: true })) : '',
     });
     state.booklet = booklet;
     state.specs = new Map();
@@ -144,6 +145,7 @@ async function generate() {
     ui.proofView.replaceChildren(renderProof(booklet, ctx));
 
     const notes = [];
+    if (ui.indexQr.checked && !state.source.url) notes.push('No index QR code: a local file has no address to link to');
     if (booklet.dropped) notes.push(`${booklet.dropped} place${booklet.dropped === 1 ? '' : 's'} did not fit on ${booklet.sheets} sheet${booklet.sheets === 1 ? '' : 's'}`);
     if (skipped.noGeometry) notes.push(`${skipped.noGeometry} without geometry skipped`);
     if (skipped.duplicate) notes.push(`${skipped.duplicate} duplicates skipped`);
@@ -168,7 +170,11 @@ async function generate() {
 
 // ---------- permalink ----------
 const params = new URLSearchParams(location.search);
-function permalink() {
+/**
+ * The parameters that reproduce this booklet. The viewer link printed on the index
+ * leaves out print-only settings to keep its QR code small.
+ */
+function bookletParams({ forViewer = false } = {}) {
   const p = new URLSearchParams();
   if (ui.url.value.trim()) p.set('url', ui.url.value.trim());
   if (!ui.whereRow.hidden && ui.where.value.trim() && ui.where.value.trim() !== '1=1') p.set('where', ui.where.value.trim());
@@ -184,7 +190,15 @@ function permalink() {
   if (ui.max.value !== '200') p.set('max', ui.max.value);
   if (!ui.qrEnabled.checked) p.set('qr', '0');
   else if (qrInput.value.trim() !== DEFAULT_LINK_TEMPLATE) p.set('qrlink', qrInput.value.trim());
-  const qs = p.toString();
+  if (!ui.indexQr.checked) p.set('indexqr', '0');
+  if (forViewer) {
+    for (const k of ['subtitle', 'paper', 'style', 'indexqr']) p.delete(k);
+    if (!p.has('title')) p.set('title', ui.title.value.trim());
+  }
+  return p;
+}
+function permalink() {
+  const qs = bookletParams().toString();
   return location.pathname + (qs ? `?${qs}` : '');
 }
 function applyParams() {
@@ -199,6 +213,7 @@ function applyParams() {
   if (params.get('style')) { if (![...ui.style.options].some((o) => o.value === params.get('style'))) ui.style.append(new Option('Custom style', params.get('style'))); ui.style.value = params.get('style'); }
   if (params.get('max')) ui.max.value = params.get('max');
   if (params.get('qr') === '0') ui.qrEnabled.checked = false;
+  if (params.get('indexqr') === '0') ui.indexQr.checked = false;
   if (params.get('qrlink')) qrInput.value = params.get('qrlink');
 }
 

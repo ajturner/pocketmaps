@@ -20,6 +20,36 @@ export const LINK_PRESETS = [
 
 export const DEFAULT_LINK_TEMPLATE = LINK_PRESETS[0].template;
 
+/** Where printed index QR codes point when the generator runs somewhere a phone cannot reach. */
+export const PUBLIC_SITE_URL = 'https://ajturner.github.io/pocketmaps/';
+
+/**
+ * Base URL for links printed in a booklet: the site serving the generator, unless
+ * that is a local dev server, in which case the public site.
+ */
+export function siteBaseUrl(loc = globalThis.location) {
+  const local = !loc || !/^https?:$/.test(loc.protocol) || /^(localhost|127\.\d+\.\d+\.\d+|\[::1\]|0\.0\.0\.0)$/.test(loc.hostname);
+  if (local) return PUBLIC_SITE_URL;
+  return loc.origin + loc.pathname.replace(/[^/]*$/, '');
+}
+
+/**
+ * Query string that URLSearchParams reads back identically, but leaves characters
+ * that are legal in a query (/ : , = ' { } @) unescaped. Printed QR codes stay
+ * smaller, so their modules stay large enough to scan.
+ */
+export function compactQuery(query) {
+  const enc = (v) => encodeURIComponent(v).replace(/%20/g, '+')
+    .replace(/%(2F|3A|2C|3D|7B|7D|40)/gi, (m) => decodeURIComponent(m));
+  return [...new URLSearchParams(query)].map(([k, v]) => `${enc(k)}=${enc(v)}`).join('&');
+}
+
+/** Link to the online map of a booklet. `query` holds the booklet's parameters. */
+export function viewerUrl(query, base = siteBaseUrl()) {
+  const qs = compactQuery(query);
+  return `${base}view.html${qs ? `?${qs}` : ''}`;
+}
+
 /** Placeholders always available, shown as chips in the editor. */
 export const BUILTIN_PLACEHOLDERS = ['latitude', 'longitude', 'name'];
 
@@ -55,11 +85,11 @@ export function unknownPlaceholders(template, fields = []) {
 }
 
 /**
- * QR code as a scalable SVG string. Medium error correction keeps it readable
- * at about 0.6 in. printed on plain paper.
+ * QR code as a scalable SVG string. Medium error correction keeps a short link
+ * readable at about 0.6 in. on plain paper; long links use 'L' so the modules stay larger.
  */
-export function qrSvg(text) {
-  const qr = qrcode(0, 'M');
+export function qrSvg(text, level = 'M') {
+  const qr = qrcode(0, level);
   qr.addData(text);
   qr.make();
   return qr.createSvgTag({ cellSize: 1, margin: 0, scalable: true });

@@ -10,6 +10,7 @@ A **PocketMod** is one sheet of paper, printed on one side and folded into an ei
 
 - **Home** (`index.html`): what PocketMaps does, with eight live examples. Each example card opens the generator with real public data, covering feature layers, a filtered Hub page and a live GeoJSON feed.
 - **Generator** (`app.html`): load data, choose fields, preview, and print. Old links of the form `/?url=…` redirect here, so existing bookmarklets keep working.
+- **Live map** (`view.html`): where the QR code on a booklet's index leads. It rebuilds the same places with the same page numbers on an interactive ArcGIS map, built with Maps SDK for JavaScript 5.2 and Calcite, and offers **Print your own copy**, which opens the generator with the same settings.
 - **How to fold** (`fold.html`): step-by-step SVG diagrams plus a table of which pages land on which sheet, computed from the same imposition code the generator uses.
 
 ## Using it
@@ -33,6 +34,8 @@ The **Pages** view shows the booklet in reading order for proofing. **Copy link*
 ?url=https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Landscape_Trees/FeatureServer/0
 &where=Condition%3D'Good'+AND+Height+>+70&name=Cmn_Name&template=%7BSci_Name%7D+%C2%B7+%7BHeight%7D+ft&overview=1
 ```
+
+The index page also prints a QR code to the live map. It is on by default; turn it off with **QR code on the index to the live map** or `indexqr=0`. From a local dev server the code points at the public site, https://ajturner.github.io/pocketmaps/, so phones can open it; change `PUBLIC_SITE_URL` in `src/links.js` if you host elsewhere. A booklet made from a local file gets no index code, because there is no address to link to.
 
 Supported parameters: `url`, `where`, `title`, `subtitle`, `name`, `desc`, `template`, `overview=1`, `sheets`, `paper=a4`, `style`, `max`, `qr=0` to drop QR codes, `qrlink` for a custom link template, and `go=0` to load without generating.
 
@@ -69,6 +72,7 @@ src/
   home.js, examples.js welcome page and curated examples
   fold.js             fold-guide diagrams (inline SVG) and nesting table
   site.css            shared styles for the welcome and fold pages
+  view.js, view.css   live map page (ArcGIS Maps SDK from js.arcgis.com, loaded only on view.html)
   styles.css          page layout, rotated cells, print rules
 legacy/ruby/          the 2008 Ruby/PDF::Writer original
 NOTES.md              review notes on the legacy code and what was preserved
